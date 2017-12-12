@@ -10,6 +10,7 @@ import (
 
 //str.115
 type Employee struct {
+    Id          int         `json:"id"`
     Title       string      `json:"title"`
     Name        string      `json:"name"`
     Position    []string    `json:"position"`
@@ -21,10 +22,28 @@ func homePage(w http.ResponseWriter, r *http.Request){
     fmt.Println("Endpoint hit: homePage")
 }
 
+//simple requests - not mux
+// func handleRequests() {
+//     http.HandleFunc("/", homePage)
+//     http.HandleFunc("/emp", returnAllEmployees)
+//     log.Fatal(http.ListenAndServe(":9999", nil))
+// }
+
+//mux
+//https://github.com/gorilla/mux
 func handleRequests() {
-    http.HandleFunc("/", homePage)
-    http.HandleFunc("/emp", returnAllEmployees)
-    log.Fatal(http.ListenAndServe(":9999", nil))
+    myRouter := mux.NewRouter().StrictSlash(true)
+    myRouter.HandleFunc("/", homePage)
+    myRouter.HandleFunc("/emp", returnAllEmployees)
+    myRouter.HandleFunc("/employee/{key}", returnSingleEmployee)
+    log.Fatal(http.ListenAndServe(":1234", myRouter))
+}
+
+func returnSingleEmployee(w http.ResponseWriter, r *http.Request){
+    vars := mux.Vars(r)
+    key := vars["id"]
+    fmt.Println("Key: " + key)
+    fmt.Println(vars)
 }
 
 func returnAllEmployees(w http.ResponseWriter, r *http.Request){
@@ -37,5 +56,8 @@ func returnAllEmployees(w http.ResponseWriter, r *http.Request){
 }    
 
 func main() {
+    // mux
+    fmt.Println("Rest API v2.0 - Mux Routers")
+
     handleRequests()
 }
