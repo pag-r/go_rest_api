@@ -42,37 +42,33 @@ func returnSingleEmployee(w http.ResponseWriter, r *http.Request){
     return
 }
 
-// TO DO
-// missing 'position' in curl
-
-
 func createSingleEmployee(w http.ResponseWriter, r *http.Request) {
     fmt.Println("Endpoint hit: createSingleEmployee")
 
-    // curl -i -X POST -d '{"id":"4","title":"test","name":"test"}' localhost:9999/emp
-    r.ParseForm()
-    fmt.Println("form: ", r.Form)
-    //map[{"id":"4","title":"test","name":"test","position":null}:[]]
+    // curl -i -H "Content-Type: application/json" -X POST -d '{"id":"4","title":"test","name":"test","position":["test_pos"]}' localhost:9999/emp
+    decoder := json.NewDecoder(r.Body)
     var employee Employee
-    for key, _ := range r.Form {
-         fmt.Println("key:",key)
-        //key: {"id":"4","title":"test","name":"test","position":null}
-        err := json.Unmarshal([]byte(key), &employee)
-        if err != nil {
-            log.Println(err.Error())
-        }
+    err := decoder.Decode(&employee)
+    if err != nil {
+        log.Println(err.Error())
     }
-    Employees = append(Employees, Employee{Id: employee.Id, Title: employee.Title, Name: employee.Name})
+    defer r.Body.Close()
+    Employees = append(Employees, Employee{ Id: employee.Id, Title: employee.Title, Name: employee.Name, Position: employee.Position })
 
-    // params := mux.Vars(r)
+    // curl -i -X POST -d '{"id":"4","title":"test","name":"test"}' localhost:9999/emp
+    // r.ParseForm()
+    // fmt.Println("form: ", r.Form)
+    // //map[{"id":"4","title":"test","name":"test","position":null}:[]]
     // var employee Employee
-    // _ = json.NewDecoder(r.Body).Decode(&Employees)
-    
-    // employee.Id = params["id"]
-    // employee.Title = params["title"]
-
-    // Employees = append(Employees, Employee{})
-    // json.NewEncoder(w).Encode(Employees)
+    // for key, _ := range r.Form {
+    //      fmt.Println("key:",key)
+    //     //key: {"id":"4","title":"test","name":"test","position":null}
+    //     err := json.Unmarshal([]byte(key), &employee)
+    //     if err != nil {
+    //         log.Println(err.Error())
+    //     }
+    // }
+    // Employees = append(Employees, Employee{Id: employee.Id, Title: employee.Title, Name: employee.Name})
 }
 
 //mux
