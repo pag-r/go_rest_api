@@ -1,16 +1,17 @@
 package main
 
 import (
+    "encoding/json"
     "fmt"
     "log"
     "net/http"
-    "encoding/json"
     "github.com/gorilla/mux"
+    "strconv"
 )
 
 //str.115
 type Employee struct {
-    Id          string      `json:"id"`
+    Id          int         `json:"id"`
     Title       string      `json:"title"`
     Name        string      `json:"name"`
     Position    []string    `json:"position"`
@@ -27,13 +28,13 @@ func homePage(w http.ResponseWriter, r *http.Request){
 func returnAllEmployees(w http.ResponseWriter, r *http.Request){
     fmt.Println("Endpoint hit: returnAllEmployees")
     json.NewEncoder(w).Encode(Employees)
-}  
+}
 
 func returnSingleEmployee(w http.ResponseWriter, r *http.Request){
     fmt.Println("Endpoint hit: returnSingleEmployee")
     params := mux.Vars(r)
     for _, item := range Employees{
-        if item.Id == params["id"] {
+        if strconv.Itoa(item.Id) == params["id"] {
             json.NewEncoder(w).Encode(item)
             return
         }
@@ -54,7 +55,8 @@ func createSingleEmployee(w http.ResponseWriter, r *http.Request) {
         log.Println(err.Error())
     }
     defer r.Body.Close()
-    Employees = append(Employees, Employee{ Id: "", Title: employee.Title, Name: employee.Name, Position: employee.Position })
+    count_id := len(Employees) + 1
+    Employees = append(Employees, Employee{ Id: count_id, Title: employee.Title, Name: employee.Name, Position: employee.Position })
 
     // curl -i -X POST -d '{"id":"4","title":"test","name":"test"}' localhost:9999/emp
     // r.ParseForm()
@@ -81,8 +83,8 @@ func deleteSingleEmployee (w http.ResponseWriter, r *http.Request) {
 func handleRequests() {
     myRouter := mux.NewRouter().StrictSlash(true)
 
-    Employees = append(Employees, Employee{Id:"1", Title:"spec1", Name:"test1", Position: []string{"admin1", "dev1"}})
-    Employees = append(Employees, Employee{Id:"2", Title:"spec1", Name:"test2", Position: []string{"admin2", "ops1"}})
+    Employees = append(Employees, Employee{Id:1, Title:"spec1", Name:"test1", Position: []string{"admin1", "dev1"}})
+    Employees = append(Employees, Employee{Id:2, Title:"spec1", Name:"test2", Position: []string{"admin2", "ops1"}})
 
     // valid for: type Employees []Employee
     // employees := Employees{
@@ -94,7 +96,7 @@ func handleRequests() {
     myRouter.HandleFunc("/emp", returnAllEmployees).Methods("GET")
     myRouter.HandleFunc("/emp/{id}", returnSingleEmployee).Methods("GET")
     myRouter.HandleFunc("/emp", createSingleEmployee).Methods("POST")
-    myRouter.HandleFunc("/emp/{id}", deleteSingleEmployee).Methods("DELETE")    
+    myRouter.HandleFunc("/emp/{id}", deleteSingleEmployee).Methods("DELETE")
     log.Fatal(http.ListenAndServe(":9999", myRouter))
 }
 
