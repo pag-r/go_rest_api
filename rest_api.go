@@ -42,10 +42,11 @@ func returnSingleEmployee(w http.ResponseWriter, r *http.Request){
     return
 }
 
+// TO DO, increment ID
 func createSingleEmployee(w http.ResponseWriter, r *http.Request) {
     fmt.Println("Endpoint hit: createSingleEmployee")
 
-    // curl -i -H "Content-Type: application/json" -X POST -d '{"id":"4","title":"test","name":"test","position":["test_pos"]}' localhost:9999/emp
+    // curl -i -H "Content-Type: application/json" -X POST -d '{"title":"test","name":"test","position":["test_pos"]}' localhost:9999/emp
     decoder := json.NewDecoder(r.Body)
     var employee Employee
     err := decoder.Decode(&employee)
@@ -53,7 +54,7 @@ func createSingleEmployee(w http.ResponseWriter, r *http.Request) {
         log.Println(err.Error())
     }
     defer r.Body.Close()
-    Employees = append(Employees, Employee{ Id: employee.Id, Title: employee.Title, Name: employee.Name, Position: employee.Position })
+    Employees = append(Employees, Employee{ Id: "", Title: employee.Title, Name: employee.Name, Position: employee.Position })
 
     // curl -i -X POST -d '{"id":"4","title":"test","name":"test"}' localhost:9999/emp
     // r.ParseForm()
@@ -69,6 +70,10 @@ func createSingleEmployee(w http.ResponseWriter, r *http.Request) {
     //     }
     // }
     // Employees = append(Employees, Employee{Id: employee.Id, Title: employee.Title, Name: employee.Name})
+}
+
+func deleteSingleEmployee (w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Endpoint hit: deleteSingleEmployee")
 }
 
 //mux
@@ -88,8 +93,8 @@ func handleRequests() {
     myRouter.HandleFunc("/", homePage).Methods("GET")
     myRouter.HandleFunc("/emp", returnAllEmployees).Methods("GET")
     myRouter.HandleFunc("/emp/{id}", returnSingleEmployee).Methods("GET")
-    //myRouter.HandleFunc("/emp/{id}", createSingleEmployee).Methods("POST")
     myRouter.HandleFunc("/emp", createSingleEmployee).Methods("POST")
+    myRouter.HandleFunc("/emp/{id}", deleteSingleEmployee).Methods("DELETE")    
     log.Fatal(http.ListenAndServe(":9999", myRouter))
 }
 
